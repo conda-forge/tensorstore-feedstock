@@ -16,7 +16,7 @@ source:
 
 build:
   skip: true  # [py<37 or win or osx]
-  number: 3
+  number: 4
 
 requirements:
   build:
