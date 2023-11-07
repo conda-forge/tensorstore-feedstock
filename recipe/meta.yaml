@@ -15,7 +15,7 @@ source:
     - patches/pybind11-linkopts.patch  # [osx]
 
 build:
-  skip: true  # [py<37 or win or osx]
+  skip: true  # [py<38 or win or osx]
   number: 0
 
 requirements:
@@ -53,6 +53,7 @@ requirements:
     # https://github.com/abseil/abseil-cpp/blob/ee0ebda/FAQ.md#what-is-abi-and-why-dont-you-recommend-using-a-pre-compiled-version-of-abseil
     # - abseil-cpp
   run:
+    - ml_dtypes
     - {{ pin_compatible('numpy') }}
     - python
     - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.9") }}  # [osx and x86_64]
