@@ -3,11 +3,13 @@ About tensorstore-feedstock
 
 Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/tensorstore-feedstock/blob/main/LICENSE.txt)
 
-Home: https://github.com/google/tensorstore
+Home: https://pypi.org/project/tensorstore/
 
 Package license: Apache-2.0 AND MIT AND BSD-3-Clause AND BSD-2-Clause
 
 Summary: Read and write large, multi-dimensional arrays
+
+Development: https://github.com/google/tensorstore
 
 Current build status
 ====================
@@ -31,13 +33,6 @@ Current build status
               <td>
                 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=20667&branchName=main">
                   <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/tensorstore-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_64_numpy1.22python3.10.____cpython" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_64_numpy1.22python3.8.____cpython</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=20667&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/tensorstore-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_64_numpy1.22python3.8.____cpython" alt="variant">
                 </a>
               </td>
             </tr><tr>
