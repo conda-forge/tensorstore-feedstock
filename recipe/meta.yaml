@@ -16,8 +16,8 @@ source:
     - patches/pybind11-linkopts.patch  # [osx]
 
 build:
-  skip: true  # [py<=38 or win or osx]
-  number: 0
+  skip: true  # [py<=38 or win]
+  number: 1
 
 requirements:
   build:
