@@ -32,6 +32,7 @@ requirements:
     - numpy                               # [target_platform != build_platform]
     - pybind11                            # [target_platform != build_platform]
     - pybind11-abi                        # [target_platform != build_platform]
+    - libcurl                             # [target_platform != build_platform]
     - nlohmann_json 3.10.5                # [target_platform != build_platform]
   host:
     - pip
