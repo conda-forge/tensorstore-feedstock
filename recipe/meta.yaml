@@ -14,10 +14,11 @@ source:
   patches:
     # MacOS needs an extra linker flag so pybind11 finds the python symbols in _tensorstore.so :shrug:
     - patches/pybind11-linkopts.patch  # [osx]
+    - patches/0001-Explicitly-select-blake3-for-arm64.patch  # [target_platform == "osx-arm64"]
 
 build:
   skip: true  # [py<=38 or win]
-  number: 1
+  number: 3
 
 requirements:
   build:
@@ -27,6 +28,11 @@ requirements:
     - bazel
     - bazel {{ bazel_version }}
     - bazel-toolchain
+    - python                              # [target_platform != build_platform]
+    - cross-python_{{ target_platform }}  # [target_platform != build_platform]
+    - numpy                               # [target_platform != build_platform]
+    - pybind11                            # [target_platform != build_platform]
+    - pybind11-abi                        # [target_platform != build_platform]
   host:
     - pip
     - python

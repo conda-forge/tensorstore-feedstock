@@ -2,14 +2,9 @@
 
 set -euxo pipefail
 
-if [[ $target_platform =~ osx.* ]]; then
-    CLANG="$CC_FOR_BUILD" source gen-bazel-toolchain
-    # SDK's curl gets in the way
-    if [[ -d "$CONDA_BUILD_SYSROOT/usr/include/curl" ]]; then
-        mv "$CONDA_BUILD_SYSROOT/usr/include/curl" "$CONDA_BUILD_SYSROOT/usr/include/curl.do-not-use"
-    fi
-else
-    source gen-bazel-toolchain
+source gen-bazel-toolchain
+if [[ $target_platform =~ osx.* && -d "$CONDA_BUILD_SYSROOT/usr/include/curl" ]]; then
+    mv "$CONDA_BUILD_SYSROOT/usr/include/curl" "$CONDA_BUILD_SYSROOT/usr/include/curl.do-not-use"
 fi
 
 system_libs="com_google_boringssl"
@@ -33,6 +28,7 @@ build_options+=" --logging=6"
 build_options+=" --verbose_failures"
 build_options+=" --toolchain_resolution_debug"
 build_options+=" --local_cpu_resources=${CPU_COUNT}"
+build_options+=" --cpu=${TARGET_CPU}"
 build_options+=" --subcommands"  # comment out for debugging
 export TENSORSTORE_BAZEL_BUILD_OPTIONS="$build_options"
 
