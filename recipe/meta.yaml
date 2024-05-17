@@ -18,7 +18,7 @@ source:
 
 build:
   skip: true  # [py<=38 or win]
-  number: 3
+  number: 4
 
 requirements:
   build:
@@ -64,7 +64,6 @@ requirements:
     # - abseil-cpp
   run:
     - ml_dtypes
-    - {{ pin_compatible('numpy') }}
     - python
 
 test:
