@@ -47,6 +47,7 @@ requirements:
     - libcurl
     - libjpeg-turbo
     - libpng
+    - libwebp
     - lz4
     - xz
     - zlib
