@@ -34,6 +34,8 @@ libpng:
 - '1.6'
 libprotobuf:
 - 4.25.3
+libwebp:
+- '1'
 numpy:
 - '1.22'
 openssl:
