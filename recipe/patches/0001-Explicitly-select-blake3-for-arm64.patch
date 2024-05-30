@@ -11,7 +11,7 @@ diff --git a/third_party/blake3/blake3.BUILD.bazel b/third_party/blake3/blake3.B
 index 1ca4fd4..4ac647a 100644
 --- a/third_party/blake3/blake3.BUILD.bazel
 +++ b/third_party/blake3/blake3.BUILD.bazel
-@@ -10,29 +10,8 @@ cc_library(
+@@ -10,30 +10,8 @@ cc_library(
          "c/blake3.c",
          "c/blake3_dispatch.c",
          "c/blake3_portable.c",
@@ -31,6 +31,7 @@ index 1ca4fd4..4ac647a 100644
 -        "@platforms//cpu:arm64": [
 -            "c/blake3_neon.c",
 -        ],
+-        "@platforms//cpu:ppc": [],
 -        (":linux_x86_64", ":macos_x86_64"): [
 -            "c/blake3_avx2_x86-64_unix.S",
 -            "c/blake3_avx512_x86-64_unix.S",
