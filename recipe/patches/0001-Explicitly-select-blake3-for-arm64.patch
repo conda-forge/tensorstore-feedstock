@@ -31,8 +31,8 @@ index 1ca4fd4..4ac647a 100644
 -        "@platforms//cpu:arm64": [
 -            "c/blake3_neon.c",
 -        ],
--	    "@platforms//cpu:ppc": [],
--        ("linux_x86_64", "macos_x86_64"): [
+-        "@platforms//cpu:ppc": [],
+-        (":linux_x86_64", ":macos_x86_64"): [
 -            "c/blake3_avx2_x86-64_unix.S",
 -            "c/blake3_avx512_x86-64_unix.S",
 -            "c/blake3_sse2_x86-64_unix.S",
