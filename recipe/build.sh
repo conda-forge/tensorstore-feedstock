@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-if [[ "$build_arch" == "powerpc64le" ]]; then
+if [[ $target_platform == "linux-ppc64le" ]]; then
 export CFLAGS=$(echo $CFLAGS | sed -e 's/-mtune=power8//g' | sed -e 's/-mcpu=power8//g' )
 export CXXFLAGS=$(echo $CXXFLAGS | sed -e 's/-mtune=power8//g' | sed -e 's/-mcpu=power8//g' )
 export DEBUG_CFLAGS=$(echo $DEBUG_CFLAGS | sed -e 's/-mtune=power8//g' | sed -e 's/-mcpu=power8//g' )
