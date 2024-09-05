@@ -38,6 +38,7 @@ requirements:
     - pip
     - python
     - wheel
+    - setuptools
     - setuptools-scm
     - numpy
     # we use openssl instead of boringssl
