@@ -18,7 +18,7 @@ source:
 
 build:
   skip: true  # [py<=38 or win]
-  number: 2
+  number: 3
 
 requirements:
   build:
