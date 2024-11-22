@@ -18,7 +18,7 @@ source:
     - patches/0002-Explicitly-select-blake3-for-ppc64.patch  # [target_platform == "linux-ppc64le"]
 
 build:
-  skip: true  # [py<=38 or win]
+  skip: true  # [win]
   number: 4
 
 requirements:
