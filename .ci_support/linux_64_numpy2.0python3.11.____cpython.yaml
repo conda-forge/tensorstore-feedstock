@@ -9,7 +9,7 @@ c_stdlib:
 c_stdlib_version:
 - '2.17'
 cdt_name:
-- cos7
+- conda
 channel_sources:
 - conda-forge
 channel_targets:
@@ -33,7 +33,7 @@ libprotobuf:
 libwebp:
 - '1'
 numpy:
-- '1.22'
+- '2.0'
 openssl:
 - '3'
 pin_run_as_build:
@@ -43,7 +43,7 @@ pin_run_as_build:
 pybind11_abi:
 - '4'
 python:
-- 3.10.* *_cpython
+- 3.11.* *_cpython
 target_platform:
 - linux-64
 xz:
@@ -51,8 +51,6 @@ xz:
 zip_keys:
 - - c_compiler_version
   - cxx_compiler_version
-- - c_stdlib_version
-  - cdt_name
 - - python
   - numpy
 zlib:
