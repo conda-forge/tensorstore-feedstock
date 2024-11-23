@@ -1,5 +1,5 @@
 {% set name = "tensorstore" %}
-{% set version = "0.1.65" %}
+{% set version = "0.1.68" %}
 # Bazel version is specified upstream, file .bazelversion
 # https://github.com/google/tensorstore/blob/master/.bazelversion
 {% set bazel_version = "6.3.2" %}
@@ -10,7 +10,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/tensorstore-{{ version }}.tar.gz
-  sha256: 65cbe5a600c32569bb0b9f597ea318cc298a13b42d5fc98168c97bb11f320eae
+  sha256: 6e13d3e3c8fb6ed67712835a343821536b38d6bdb517db554d41cebfe5947ab7
   patches:
     # MacOS needs an extra linker flag so pybind11 finds the python symbols in _tensorstore.so :shrug:
     - patches/pybind11-linkopts.patch  # [osx]
@@ -19,7 +19,7 @@ source:
 
 build:
   skip: true  # [win]
-  number: 4
+  number: 0
 
 requirements:
   build:
