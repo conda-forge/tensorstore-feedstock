@@ -9,7 +9,7 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/tensorstore-{{ version }}.tar.gz
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/tensorstore-{{ version }}.tar.gz
   sha256: 65cbe5a600c32569bb0b9f597ea318cc298a13b42d5fc98168c97bb11f320eae
   patches:
     # MacOS needs an extra linker flag so pybind11 finds the python symbols in _tensorstore.so :shrug:
@@ -19,7 +19,7 @@ source:
 
 build:
   skip: true  # [win]
-  number: 4
+  number: 5
 
 requirements:
   build:
@@ -35,6 +35,7 @@ requirements:
     - numpy                               # [target_platform != build_platform]
     - pybind11                            # [target_platform != build_platform]
     - pybind11-abi                        # [target_platform != build_platform]
+    - zlib                                # [target_platform != build_platform]
   host:
     - pip
     - python
