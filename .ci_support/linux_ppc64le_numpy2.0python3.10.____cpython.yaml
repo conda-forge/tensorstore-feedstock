@@ -26,6 +26,8 @@ libcurl:
 - '8'
 libjpeg_turbo:
 - '3'
+liblzma_devel:
+- '5'
 libpng:
 - '1.6'
 libprotobuf:
@@ -46,8 +48,6 @@ python:
 - 3.10.* *_cpython
 target_platform:
 - linux-ppc64le
-xz:
-- '5'
 zip_keys:
 - - c_compiler_version
   - cxx_compiler_version
