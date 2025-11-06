@@ -2,7 +2,7 @@
 {% set version = "0.1.65" %}
 # Bazel version is specified upstream, file .bazelversion
 # https://github.com/google/tensorstore/blob/master/.bazelversion
-{% set bazel_version = "6.3.2" %}
+{% set bazel_version = "6.*" %}
 
 package:
   name: {{ name|lower }}
@@ -19,7 +19,7 @@ source:
 
 build:
   skip: true  # [win]
-  number: 5
+  number: 6
 
 requirements:
   build:
@@ -30,6 +30,8 @@ requirements:
     - bazel
     - bazel {{ bazel_version }}
     - bazel-toolchain
+    # https://github.com/conda-forge/bazel-toolchain-feedstock/pull/22
+    - bazel-toolchain <0.3                # [osx]
     - python                              # [target_platform != build_platform]
     - cross-python_{{ target_platform }}  # [target_platform != build_platform]
     - numpy                               # [target_platform != build_platform]
