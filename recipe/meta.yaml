@@ -30,6 +30,8 @@ requirements:
     - bazel
     - bazel {{ bazel_version }}
     - bazel-toolchain
+    # https://github.com/conda-forge/bazel-toolchain-feedstock/pull/22
+    - bazel-toolchain < 0.3               # [osx]
     - python                              # [target_platform != build_platform]
     - cross-python_{{ target_platform }}  # [target_platform != build_platform]
     - numpy                               # [target_platform != build_platform]
