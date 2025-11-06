@@ -4,5 +4,7 @@ c_stdlib_version:          # [osx and x86_64]
 MACOSX_SDK_VERSION:        # [osx and x86_64]
   - "10.15"                # [osx and x86_64]
 # See https://github.com/llvm/llvm-project/issues/94049
+c_compiler_version:        # [osx]
+  - '18'                   # [osx]
 cxx_compiler_version:      # [osx]
   - '18'                   # [osx]
