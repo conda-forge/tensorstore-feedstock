@@ -54,7 +54,7 @@ requirements:
     - libpng
     - libwebp
     - lz4
-    - xz
+    - liblzma-devel
     - zlib
     - libprotobuf
     # unvendored
