@@ -19,7 +19,7 @@ source:
 
 build:
   skip: true  # [win]
-  number: 7
+  number: 8
 
 requirements:
   build:
@@ -54,7 +54,7 @@ requirements:
     - libpng
     - libwebp
     - lz4
-    - xz
+    - liblzma-devel
     - zlib
     - libprotobuf
     # unvendored
