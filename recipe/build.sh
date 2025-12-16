@@ -35,6 +35,8 @@ build_options+=" --crosstool_top=//bazel_toolchain:toolchain"
 build_options+=" --logging=6"
 build_options+=" --verbose_failures"
 build_options+=" --toolchain_resolution_debug=.*"
+build_options+=" --enable_workspace"  # Bazel 8 compatibility: use WORKSPACE instead of MODULE.bazel
+build_options+=" --noenable_bzlmod"
 build_options+=" --local_cpu_resources=${CPU_COUNT}"
 build_options+=" --cpu=${TARGET_CPU}"
 build_options+=" --subcommands"  # comment out for debugging
