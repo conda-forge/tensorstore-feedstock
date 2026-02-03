@@ -3,6 +3,7 @@
 # Bazel version is specified upstream, file .bazelversion
 # https://github.com/google/tensorstore/blob/master/.bazelversion
 {% set bazel_version = "8.*" %}
+{% set python_min = "3.11" %}
 
 package:
   name: {{ name|lower }}
