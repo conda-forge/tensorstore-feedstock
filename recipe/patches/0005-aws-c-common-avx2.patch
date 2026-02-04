@@ -1,0 +1,69 @@
+diff --git a/third_party/aws_c_common/aws_c_common.BUILD.bazel b/third_party/aws_c_common/aws_c_common.BUILD.bazel
+index 2a4ab246..af3a0c6d 100644
+--- a/third_party/aws_c_common/aws_c_common.BUILD.bazel
++++ b/third_party/aws_c_common/aws_c_common.BUILD.bazel
+@@ -74,10 +74,8 @@ _SRCS = glob([
+     ":x86_64_msvc": glob(["source/arch/intel/msvc/*.c"]),
+     ":x86_64_gcc_or_clang": glob(["source/arch/intel/asm/*.c"]),
+     "//conditions:default": [],
+-}) + select({
+-    ":have_avx2_intrinsics": ["source/arch/intel/encoding_avx2.c"],
+-    "//conditions:default": [],
+ })
++# Note: encoding_avx2.c moved to separate target to ensure AVX2 flags are properly applied
+
+ _X86_GCC_COPTS = [
+     "-mavx",
+@@ -98,6 +96,40 @@ _COPTS = select({
+     "//conditions:default": [],
+ })
+
++# Separate library for AVX2 encoding to ensure proper compiler flags
++cc_library(
++    name = "encoding_avx2",
++    srcs = select({
++        ":have_avx2_intrinsics": ["source/arch/intel/encoding_avx2.c"],
++        "//conditions:default": [],
++    }),
++    hdrs = glob([
++        "include/aws/common/*.h",
++        "include/aws/common/private/*.h",
++    ]) + [
++        "include/aws/common/config.h",
++    ],
++    copts = select({
++        ":x86_64_msvc": ["/arch:AVX2"],
++        ":x86_64_gcc_or_clang": ["-mavx", "-mavx2", "-mpclmul", "-msse4.2"],
++        ":x86_64_mingw_gcc": ["-mavx", "-mavx2", "-mpclmul", "-msse4.2"],
++        ":arm64_msvc": [],
++        ":arm64_gcc_or_clang": ["-march=armv8-a+crc+crypto", "-mtune=neoverse-v1"],
++        "//conditions:default": ["-mavx", "-mavx2", "-mpclmul", "-msse4.2"],  # Default to x86 AVX2 flags
++    }),
++    defines = [
++        "INTEL_NO_ITTNOTIFY_API",
++    ],
++    includes = [
++        "include",
++    ],
++    local_defines = _LOCAL_DEFINES,
++    textual_hdrs = glob([
++        "include/**/*.inl",
++    ]),
++    alwayslink = 1,
++)
++
+ cc_library(
+     name = "aws_c_common",
+     srcs = _SRCS,
+@@ -147,7 +179,10 @@ cc_library(
+     deps = [
+         ":external_cjson",
+         ":external_libcbor",
+-    ],
++    ] + select({
++        ":have_avx2_intrinsics": [":encoding_avx2"],
++        "//conditions:default": [],
++    }),
+ )
+
+ cc_library(

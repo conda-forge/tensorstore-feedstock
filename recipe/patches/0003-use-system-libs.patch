@@ -1,0 +1,222 @@
+diff --git a/bazel/repo_rules/third_party_http_archive.bzl b/bazel/repo_rules/third_party_http_archive.bzl
+index 551a5bc1..4e3db704 100644
+--- a/bazel/repo_rules/third_party_http_archive.bzl
++++ b/bazel/repo_rules/third_party_http_archive.bzl
+@@ -34,6 +34,40 @@ load(
+
+ SYSTEM_LIBS_ENVVAR = "TENSORSTORE_SYSTEM_LIBS"
+
++def _detect_lib_dir(ctx):
++    """Detects the system library directory path."""
++    lib_dir = repo_utils.getenv(ctx, "TENSORSTORE_LIB_DIR")
++    if lib_dir == None or lib_dir == "":
++        prefix = repo_utils.getenv(ctx, "PREFIX")
++        if prefix:
++            lib_dir = prefix + "/lib"
++    if lib_dir == None or lib_dir == "":
++        conda_prefix = repo_utils.getenv(ctx, "CONDA_PREFIX")
++        if conda_prefix:
++            lib_dir = conda_prefix + "/lib"
++    return lib_dir
++
++def _symlink_system_libs(ctx, logger, lib_names):
++    """Symlinks specific library files from system lib directory."""
++    lib_dir = _detect_lib_dir(ctx)
++    if lib_dir == None or lib_dir == "":
++        logger.warn(lambda: "Could not detect system lib directory")
++        return
++
++    lib_path = ctx.path(lib_dir)
++    if not lib_path.exists:
++        logger.warn(lambda: "Lib dir not found: {}".format(lib_dir))
++        return
++
++    for lib_name in lib_names:
++        for ext in [".so", ".dylib", ".a"]:
++            lib_file = lib_dir + "/lib" + lib_name + ext
++            lib_file_path = ctx.path(lib_file)
++            if lib_file_path.exists:
++                repo_utils.watch(ctx, lib_file_path)
++                ctx.symlink(lib_file_path, "lib" + lib_name + ext)
++                logger.info(lambda: "Symlinked: {}".format(lib_file))
++
+ def _handle_use_system_lib(ctx, logger):
+     use_syslib = repo_utils.use_system_lib(ctx, ctx.attr.name, SYSTEM_LIBS_ENVVAR)
+     if not use_syslib:
+@@ -47,10 +81,117 @@ def _handle_use_system_lib(ctx, logger):
+             name = ctx.attr.name,
+             envvar = SYSTEM_LIBS_ENVVAR,
+         ))
++
++    # Symlink specific library files based on package
++    if ctx.attr.name == "org_blosc_cblosc":
++        _symlink_system_libs(ctx, logger, ["blosc"])
++    elif ctx.attr.name == "org_aomedia_avif":
++        _symlink_system_libs(ctx, logger, ["avif"])
++    elif ctx.attr.name == "libwebp":
++        _symlink_system_libs(ctx, logger, ["webp", "webpdemux", "webpmux"])
++
+     ctx.template(
+         "BUILD.bazel",
+         ctx.attr.system_build_file,
+     )
++    if ctx.attr.name == "com_github_pybind_pybind11":
++        include_dir = repo_utils.getenv(ctx, "TENSORSTORE_PYBIND11_INCLUDE_DIR")
++        if include_dir == None or include_dir == "":
++            include_dir = repo_utils.getenv(ctx, "PYBIND11_INCLUDE_DIR")
++
++        # Auto-detect from Python if not explicitly set
++        if include_dir == None or include_dir == "":
++            result = repo_utils.execute_unchecked(
++                ctx,
++                op = "DetectPybind11IncludeDir",
++                arguments = [
++                    "python3",
++                    "-c",
++                    "import pybind11; print(pybind11.get_include(), end='')",
++                ],
++                quiet = True,
++                logger = logger,
++            )
++            if result.return_code == 0 and result.stdout:
++                include_dir = result.stdout
++                logger.info(lambda: "Auto-detected pybind11 include dir: {}".format(include_dir))
++
++        if include_dir != None and include_dir != "":
++            include_path = ctx.path(include_dir)
++            if include_path.exists:
++                repo_utils.watch_tree(ctx, include_path)
++                ctx.symlink(include_path, "include")
++                logger.info(lambda: "Using system pybind11 from: {}".format(include_dir))
++            else:
++                logger.fail(lambda: "PYBIND11 include dir not found: {}".format(include_dir))
++        else:
++            logger.warn(lambda: "Could not detect pybind11 include directory. System pybind11 may not work.")
++    if ctx.attr.name == "org_blosc_cblosc":
++        include_dir = repo_utils.getenv(ctx, "TENSORSTORE_BLOSC_INCLUDE_DIR")
++        if include_dir == None or include_dir == "":
++            include_dir = repo_utils.getenv(ctx, "BLOSC_INCLUDE_DIR")
++        if include_dir == None or include_dir == "":
++            prefix = repo_utils.getenv(ctx, "PREFIX")
++            if prefix:
++                include_dir = prefix + "/include"
++        if include_dir == None or include_dir == "":
++            conda_prefix = repo_utils.getenv(ctx, "CONDA_PREFIX")
++            if conda_prefix:
++                include_dir = conda_prefix + "/include"
++        if include_dir != None and include_dir != "":
++            include_path = ctx.path(include_dir)
++            if include_path.exists:
++                repo_utils.watch_tree(ctx, include_path)
++                ctx.symlink(include_path, "include")
++                logger.info(lambda: "Using system blosc headers from: {}".format(include_dir))
++            else:
++                logger.fail(lambda: "blosc include dir not found: {}".format(include_dir))
++        else:
++            logger.warn(lambda: "Could not detect blosc include directory. System blosc may not work.")
++    if ctx.attr.name == "org_aomedia_avif":
++        include_dir = repo_utils.getenv(ctx, "TENSORSTORE_AVIF_INCLUDE_DIR")
++        if include_dir == None or include_dir == "":
++            include_dir = repo_utils.getenv(ctx, "AVIF_INCLUDE_DIR")
++        if include_dir == None or include_dir == "":
++            prefix = repo_utils.getenv(ctx, "PREFIX")
++            if prefix:
++                include_dir = prefix + "/include"
++        if include_dir == None or include_dir == "":
++            conda_prefix = repo_utils.getenv(ctx, "CONDA_PREFIX")
++            if conda_prefix:
++                include_dir = conda_prefix + "/include"
++        if include_dir != None and include_dir != "":
++            include_path = ctx.path(include_dir)
++            if include_path.exists:
++                repo_utils.watch_tree(ctx, include_path)
++                ctx.symlink(include_path, "include")
++                logger.info(lambda: "Using system avif headers from: {}".format(include_dir))
++            else:
++                logger.fail(lambda: "avif include dir not found: {}".format(include_dir))
++        else:
++            logger.warn(lambda: "Could not detect avif include directory. System avif may not work.")
++    if ctx.attr.name == "libwebp":
++        include_dir = repo_utils.getenv(ctx, "TENSORSTORE_WEBP_INCLUDE_DIR")
++        if include_dir == None or include_dir == "":
++            include_dir = repo_utils.getenv(ctx, "WEBP_INCLUDE_DIR")
++        if include_dir == None or include_dir == "":
++            prefix = repo_utils.getenv(ctx, "PREFIX")
++            if prefix:
++                include_dir = prefix + "/include"
++        if include_dir == None or include_dir == "":
++            conda_prefix = repo_utils.getenv(ctx, "CONDA_PREFIX")
++            if conda_prefix:
++                include_dir = conda_prefix + "/include"
++        if include_dir != None and include_dir != "":
++            include_path = ctx.path(include_dir)
++            if include_path.exists:
++                repo_utils.watch_tree(ctx, include_path)
++                ctx.symlink(include_path, "include")
++                logger.info(lambda: "Using system libwebp headers from: {}".format(include_dir))
++            else:
++                logger.fail(lambda: "libwebp include dir not found: {}".format(include_dir))
++        else:
++            logger.warn(lambda: "Could not detect libwebp include directory. System libwebp may not work.")
+     return True
+
+ def _third_party_http_archive_impl(ctx):
+diff --git a/third_party/com_github_pybind_pybind11/system.BUILD.bazel b/third_party/com_github_pybind_pybind11/system.BUILD.bazel
+index a7ad6ec9..7fcb4daf 100644
+--- a/third_party/com_github_pybind_pybind11/system.BUILD.bazel
++++ b/third_party/com_github_pybind_pybind11/system.BUILD.bazel
+@@ -4,6 +4,8 @@ load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+ cc_library(
+     name = "pybind11",
++    hdrs = glob(include = ["include/pybind11/**/*.h"], allow_empty = True),
++    includes = ["include"],
+     visibility = ["//visibility:public"],
+     deps = [
+         "@rules_python//python/cc:current_py_cc_headers",
+diff --git a/third_party/libwebp/system.BUILD.bazel b/third_party/libwebp/system.BUILD.bazel
+index cefba1e8..262d9a43 100644
+--- a/third_party/libwebp/system.BUILD.bazel
++++ b/third_party/libwebp/system.BUILD.bazel
+@@ -2,10 +2,8 @@ load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+ cc_library(
+     name = "webp",
+-    linkopts = [
+-        "-lwebp",
+-        "-lwebpdemux",
+-        "-lwebpmux",
+-    ],
++    srcs = glob(["libwebp*.*"], allow_empty = True),
++    hdrs = glob(include = ["include/**/*.h"], allow_empty = True),
++    includes = ["include"],
+     visibility = ["//visibility:public"],
+ )
+diff --git a/third_party/org_aomedia_avif/system.BUILD.bazel b/third_party/org_aomedia_avif/system.BUILD.bazel
+index c7812877..90d87ca4 100644
+--- a/third_party/org_aomedia_avif/system.BUILD.bazel
++++ b/third_party/org_aomedia_avif/system.BUILD.bazel
+@@ -2,6 +2,8 @@ load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+ cc_library(
+     name = "avif",
+-    linkopts = ["-lavif"],
++    srcs = glob(["libavif.*"], allow_empty = True),
++    hdrs = glob(include = ["include/**/*.h"], allow_empty = True),
++    includes = ["include"],
+     visibility = ["//visibility:public"],
+ )
+diff --git a/third_party/org_blosc_cblosc/system.BUILD.bazel b/third_party/org_blosc_cblosc/system.BUILD.bazel
+index 86ac3f74..e78ac3a8 100644
+--- a/third_party/org_blosc_cblosc/system.BUILD.bazel
++++ b/third_party/org_blosc_cblosc/system.BUILD.bazel
+@@ -2,6 +2,8 @@ load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+ cc_library(
+     name = "blosc",
+-    linkopts = ["-lblosc"],
++    srcs = glob(["libblosc.*"], allow_empty = True),
++    hdrs = glob(include = ["include/**/*.h"], allow_empty = True),
++    includes = ["include"],
+     visibility = ["//visibility:public"],
+ )

@@ -17,6 +17,9 @@ source:
     - patches/pybind11-linkopts.patch  # [osx]
     - patches/0001-Explicitly-select-blake3-for-arm64.patch  # [target_platform == "osx-arm64" or target_platform == "linux-aarch64"]
     - patches/0002-Explicitly-select-blake3-for-ppc64.patch  # [target_platform == "linux-ppc64le"]
+    - patches/0003-use-system-libs.patch
+    - patches/0004-use-system-numpy.patch
+    - patches/0005-aws-c-common-avx2.patch
 
 build:
   skip: true  # [win]
