@@ -2,6 +2,8 @@
 
 set -euxo pipefail
 
+export TENSORSTORE_USE_SYSTEM_NUMPY=1
+
 if [[ $target_platform == "linux-ppc64le" ]]; then
 export CFLAGS=$(echo $CFLAGS | sed -e 's/-mtune=power8//g' | sed -e 's/-mcpu=power8//g' )
 export CXXFLAGS=$(echo $CXXFLAGS | sed -e 's/-mtune=power8//g' | sed -e 's/-mcpu=power8//g' )
