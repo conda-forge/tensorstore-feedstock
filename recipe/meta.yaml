@@ -91,9 +91,9 @@ about:
   license: Apache-2.0 AND MIT AND BSD-3-Clause AND BSD-2-Clause
   license_file:
     - LICENSE
-    - licenses/com_google_absl.txt
-    - licenses/com_google_re2.txt
-    - licenses/com_google_riegeli.txt
+    - licenses/abseil-cpp.txt
+    - licenses/re2.txt
+    - licenses/riegeli.txt
     - licenses/net_sourceforge_half.txt
   dev_url: https://github.com/google/tensorstore
 

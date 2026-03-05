@@ -61,10 +61,28 @@ ${PYTHON} -m pip install . -vv
 # Save vendored licenses
 mkdir -p licenses
 ls bazel-work/external/
-cp bazel-work/external/com_google_absl/LICENSE "${SRC_DIR}/licenses/com_google_absl.txt"
-cp bazel-work/external/com_google_re2/LICENSE "${SRC_DIR}/licenses/com_google_re2.txt"
-cp bazel-work/external/com_google_riegeli/LICENSE "${SRC_DIR}/licenses/com_google_riegeli.txt"
-cp bazel-work/external/net_sourceforge_half/LICENSE.txt "${SRC_DIR}/licenses/net_sourceforge_half.txt"
+
+copy_vendored_license() {
+    local out_name="$1"
+    shift
+    local repo
+    local candidate
+    for repo in "$@"; do
+        for candidate in LICENSE LICENSE.txt COPYING COPYING.txt; do
+            if [[ -f "bazel-work/external/${repo}/${candidate}" ]]; then
+                cp "bazel-work/external/${repo}/${candidate}" "${SRC_DIR}/licenses/${out_name}"
+                return 0
+            fi
+        done
+    done
+    echo "Could not locate vendored license for ${out_name}. Checked repos: $*" >&2
+    return 1
+}
+
+copy_vendored_license abseil-cpp.txt abseil-cpp com_google_absl
+copy_vendored_license re2.txt re2 com_google_re2
+copy_vendored_license riegeli.txt riegeli com_google_riegeli
+copy_vendored_license net_sourceforge_half.txt net_sourceforge_half
 
 # Clean up a bit to speed-up prefix post-processing
 bazel clean || true
