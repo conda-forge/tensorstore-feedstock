@@ -1,0 +1,23 @@
+diff --git a/third_party/aws_c_common/aws_c_common.BUILD.bazel b/third_party/aws_c_common/aws_c_common.BUILD.bazel
+--- a/third_party/aws_c_common/aws_c_common.BUILD.bazel
++++ b/third_party/aws_c_common/aws_c_common.BUILD.bazel
+@@ -61,6 +61,7 @@ _SRCS = glob([
+ }) + select({
+     "@platforms//cpu:x86_64": [
+         "source/arch/intel/cpuid.c",
++        "source/arch/intel/asm/cpuid.c",
+     ],
+     "@platforms//cpu:arm64": [],
+     "//conditions:default": glob(["source/arch/generic/*.c"]),
+@@ -70,9 +71,9 @@ _SRCS = glob([
+     ":linux_arm64": glob(["source/arch/arm/auxv/*.c"]),
+     "//conditions:default": [],
+ }) + select({
+-    ":x86_64_mingw_gcc": glob(["source/arch/intel/asm/*.c"]),
++    ":x86_64_mingw_gcc": [],
+     ":x86_64_msvc": glob(["source/arch/intel/msvc/*.c"]),
+-    ":x86_64_gcc_or_clang": glob(["source/arch/intel/asm/*.c"]),
++    ":x86_64_gcc_or_clang": [],
+     "//conditions:default": [],
+ })
+ # Note: encoding_avx2.c moved to separate target to ensure AVX2 flags are properly applied
