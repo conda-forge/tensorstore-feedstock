@@ -24,7 +24,7 @@ source:
     - patches/0007-aws-c-common-cpuid-fallback.patch
 
 build:
-  skip: true  # [win]
+  skip: true  # [win or py<311]
   number: 0
 
 requirements:
