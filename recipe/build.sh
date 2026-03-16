@@ -55,6 +55,7 @@ build_options+=" --conlyopt=-fdata-sections"
 build_options+=" --cxxopt=-ffunction-sections"
 build_options+=" --cxxopt=-fdata-sections"
 build_options+=" --linkopt=-Wl,--gc-sections"
+build_options+=" --linkopt=-Wl,--no-inline-optimize"
 build_options+=" --linkopt=-Wl,--stub-group-size=1"
 fi
 build_options+=" --subcommands"  # comment out for debugging
@@ -85,6 +86,7 @@ build --conlyopt=-fdata-sections
 build --cxxopt=-ffunction-sections
 build --cxxopt=-fdata-sections
 build --linkopt=-Wl,--gc-sections
+build --linkopt=-Wl,--no-inline-optimize
 build --linkopt=-Wl,--stub-group-size=1
 EOF
 fi
