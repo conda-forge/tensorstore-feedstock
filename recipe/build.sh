@@ -47,6 +47,16 @@ build_options+=" --noenable_bzlmod"
 build_options+=" --define=with_cross_compiler_support=true"
 build_options+=" --local_cpu_resources=${CPU_COUNT}"
 build_options+=" --cpu=${TARGET_CPU}"
+if [[ $target_platform == "linux-ppc64le" ]]; then
+build_options+=" --conlyopt=-mlongcall"
+build_options+=" --cxxopt=-mlongcall"
+build_options+=" --conlyopt=-ffunction-sections"
+build_options+=" --conlyopt=-fdata-sections"
+build_options+=" --cxxopt=-ffunction-sections"
+build_options+=" --cxxopt=-fdata-sections"
+build_options+=" --linkopt=-Wl,--gc-sections"
+build_options+=" --linkopt=-Wl,--stub-group-size=1"
+fi
 build_options+=" --subcommands"  # comment out for debugging
 export TENSORSTORE_BAZEL_BUILD_OPTIONS="$build_options"
 
@@ -65,6 +75,19 @@ build --define=with_cross_compiler_support=true
 build --local_cpu_resources=${CPU_COUNT}
 build --cpu=${TARGET_CPU}
 EOF
+
+if [[ $target_platform == "linux-ppc64le" ]]; then
+cat >> .bazelrc <<EOF
+build --conlyopt=-mlongcall
+build --cxxopt=-mlongcall
+build --conlyopt=-ffunction-sections
+build --conlyopt=-fdata-sections
+build --cxxopt=-ffunction-sections
+build --cxxopt=-fdata-sections
+build --linkopt=-Wl,--gc-sections
+build --linkopt=-Wl,--stub-group-size=1
+EOF
+fi
 
 # replace bundled baselisk with a simpler forwarder to our own bazel in build prefix
 export BAZEL_EXE="${BUILD_PREFIX}/bin/bazel"
