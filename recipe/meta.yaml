@@ -24,6 +24,7 @@ source:
     - patches/0007-aws-c-common-cpuid-fallback.patch
     - patches/0008-protobuf-upb-no-werror.patch  # [osx]
     - patches/0009-protobuf-map-field-deprecation.patch  # [target_platform == "linux-ppc64le"]
+    - patches/0010-reduce-python-driver-set-on-ppc64le.patch  # [target_platform == "linux-ppc64le"]
 
 build:
   skip: true  # [win or py<311]
