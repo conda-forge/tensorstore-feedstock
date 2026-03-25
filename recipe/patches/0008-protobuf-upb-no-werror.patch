@@ -1,0 +1,29 @@
+diff --git a/third_party/com_google_protobuf/workspace.bzl b/third_party/com_google_protobuf/workspace.bzl
+index e34e57d0..4e77dbc7 100644
+--- a/third_party/com_google_protobuf/workspace.bzl
++++ b/third_party/com_google_protobuf/workspace.bzl
+@@ -29,6 +29,8 @@ def repo():
+             Label("//third_party:com_google_protobuf/patches/build_defs_mingw.diff"),
+             # protobuf uses rules_java, but we don't want to import it.
+             Label("//third_party:com_google_protobuf/patches/no_rules_java.diff"),
++            # Clang 18 on macOS promotes new upb diagnostics through this Werror.
++            Label("//third_party:com_google_protobuf/patches/upb_no_werror_incompatible_pointer_types.diff"),
+         ],
+         patch_args = ["-p1"],
+         repo_mapping = {
+diff --git a/third_party/com_google_protobuf/patches/upb_no_werror_incompatible_pointer_types.diff b/third_party/com_google_protobuf/patches/upb_no_werror_incompatible_pointer_types.diff
+new file mode 100644
+--- /dev/null
++++ b/third_party/com_google_protobuf/patches/upb_no_werror_incompatible_pointer_types.diff
+@@ -0,0 +1,11 @@
++--- a/upb/bazel/build_defs.bzl
+++++ b/upb/bazel/build_defs.bzl
++@@ -9,8 +9,6 @@
++ 
++ _DEFAULT_CPPOPTS = []
++ _DEFAULT_COPTS = [
++-    # this is a compile error in C++ clang and GNU C, but not clang C by default
++-    "-Werror=incompatible-pointer-types",
++     # GCC does not seem to support the no_sanitize attribute in some places
++     # where we use it.
++     "-Wno-error=attributes",

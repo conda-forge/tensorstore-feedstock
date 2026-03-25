@@ -1,8 +1,9 @@
 {% set name = "tensorstore" %}
-{% set version = "0.1.65" %}
+{% set version = "0.1.80" %}
 # Bazel version is specified upstream, file .bazelversion
 # https://github.com/google/tensorstore/blob/master/.bazelversion
-{% set bazel_version = "6.*" %}
+{% set bazel_version = "8.*" %}
+{% set python_min = "3.11" %}
 
 package:
   name: {{ name|lower }}
@@ -10,16 +11,22 @@ package:
 
 source:
   url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/tensorstore-{{ version }}.tar.gz
-  sha256: 65cbe5a600c32569bb0b9f597ea318cc298a13b42d5fc98168c97bb11f320eae
+  sha256: 4158fe76b96f62d12a37d7868150d836e089b5280b2bdd363c43c5d651f10e26
   patches:
     # MacOS needs an extra linker flag so pybind11 finds the python symbols in _tensorstore.so :shrug:
     - patches/pybind11-linkopts.patch  # [osx]
     - patches/0001-Explicitly-select-blake3-for-arm64.patch  # [target_platform == "osx-arm64" or target_platform == "linux-aarch64"]
-    - patches/0002-Explicitly-select-blake3-for-ppc64.patch  # [target_platform == "linux-ppc64le"]
+    - patches/0003-use-system-libs.patch
+    - patches/0004-use-system-numpy.patch
+    - patches/0005-aws-c-common-avx2.patch
+    - patches/0006-pybind11-typing-tuple.patch
+    - patches/0007-aws-c-common-cpuid-fallback.patch
+    - patches/0008-protobuf-upb-no-werror.patch  # [osx]
+    - patches/0009-c-ares-darwin-no-msg_nosignal.patch  # [osx]
 
 build:
-  skip: true  # [win]
-  number: 9
+  skip: true  # [win or py<311]
+  number: 0
 
 requirements:
   build:
@@ -85,9 +92,9 @@ about:
   license: Apache-2.0 AND MIT AND BSD-3-Clause AND BSD-2-Clause
   license_file:
     - LICENSE
-    - licenses/com_google_absl.txt
-    - licenses/com_google_re2.txt
-    - licenses/com_google_riegeli.txt
+    - licenses/abseil-cpp.txt
+    - licenses/re2.txt
+    - licenses/riegeli.txt
     - licenses/net_sourceforge_half.txt
   dev_url: https://github.com/google/tensorstore
 
