@@ -24,7 +24,6 @@ source:
     - patches/0003-use-system-libs.patch
     - patches/0004-use-system-numpy.patch
     - patches/0005-aws-c-common-avx2.patch
-    - patches/0006-pybind11-typing-tuple.patch
     - patches/0007-aws-c-common-cpuid-fallback.patch
     - if: osx
       then: patches/0008-protobuf-upb-no-werror.patch
