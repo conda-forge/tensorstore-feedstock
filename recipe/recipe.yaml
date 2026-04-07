@@ -26,12 +26,11 @@ source:
     - patches/0005-aws-c-common-avx2.patch
     - patches/0007-aws-c-common-cpuid-fallback.patch
     - if: osx
-      then: patches/0008-protobuf-upb-no-werror.patch
-    - if: osx
-      then: patches/0009-c-ares-darwin-no-msg_nosignal.patch
-
+      then:
+        - patches/0008-protobuf-upb-no-werror.patch
+        - patches/0009-c-ares-darwin-no-msg_nosignal.patch
 build:
-  number: 0
+  number: 1
   skip: win or match(python, "<3.11")
 
 requirements:
@@ -47,17 +46,13 @@ requirements:
     - if: osx
       then: bazel-toolchain <0.3
     - if: target_platform != build_platform
-      then: python
-    - if: target_platform != build_platform
-      then: cross-python_${{ target_platform }}
-    - if: target_platform != build_platform
-      then: numpy
-    - if: target_platform != build_platform
-      then: pybind11
-    - if: target_platform != build_platform
-      then: pybind11-abi
-    - if: target_platform != build_platform
-      then: zlib
+      then:
+        - python
+        - cross-python_${{ target_platform }}
+        - numpy
+        - pybind11
+        - pybind11-abi
+        - zlib
   host:
     - pip
     - python
