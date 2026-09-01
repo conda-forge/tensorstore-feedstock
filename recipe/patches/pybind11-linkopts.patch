@@ -1,13 +1,13 @@
---- python/tensorstore/BUILD	2022-07-18 11:20:35.000000000 +0200
-+++ python/tensorstore/BUILD	2022-07-18 11:23:52.000000000 +0200
-@@ -27,6 +27,10 @@
+--- a/python/tensorstore/BUILD
++++ b/python/tensorstore/BUILD
+@@ -38,6 +38,10 @@
      name = "_tensorstore",
-     srcs = ["tensorstore.cc"],
+     srcs = ["tensorstore_module.cc"],
      imports = [".."],
 +    linkopts = select({
 +        "@platforms//os:macos": ["-Wl,-undefined,dynamic_lookup"],
 +        "//conditions:default": [],
 +    }),
      deps = [
-         ":chunk_layout",
-         ":context",
+         ":batch",
+         ":cast",
