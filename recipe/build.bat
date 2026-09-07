@@ -26,10 +26,18 @@ set "TENSORSTORE_BAZELISK=%RECIPE_DIR%\bazelisk_shim.py"
 :: Bazel's own output tree plus tensorstore's third-party dependency graph
 :: (grpc, aws-sdk-cpp, protobuf, abseil, ...) easily exceeds Windows' 260
 :: character MAX_PATH. Keep both the output base and TEMP short.
+::
+:: NOTE: TENSORSTORE_BAZEL_STARTUP_OPTIONS is parsed with Python's
+:: shlex.split() (POSIX mode) by tensorstore's setup.py, which treats `\` as
+:: an escape character and silently swallows it (e.g. "C:\bzlout" becomes
+:: "C:bzlout", a *drive-relative* path that Bazel rejects outright). Use
+:: forward slashes here, which Bazel accepts fine on Windows and which
+:: shlex.split() leaves alone.
 if not exist "%SYSTEMDRIVE%\bld" mkdir "%SYSTEMDRIVE%\bld"
 set "TEMP=%SYSTEMDRIVE%\bld"
 set "TMP=%SYSTEMDRIVE%\bld"
-set "TENSORSTORE_BAZEL_STARTUP_OPTIONS=--output_base=%SYSTEMDRIVE%\bzlout"
+set "BAZEL_OUTPUT_BASE=%SYSTEMDRIVE%/bzlout"
+set "TENSORSTORE_BAZEL_STARTUP_OPTIONS=--output_base=%BAZEL_OUTPUT_BASE%"
 
 %PYTHON% -m pip install . -vv
 if errorlevel 1 exit /b 1
@@ -47,8 +55,8 @@ call :copy_vendored_license net_sourceforge_half.txt net_sourceforge_half
 if errorlevel 1 exit /b 1
 
 :: Clean up a bit to speed-up prefix post-processing
-%BAZEL_EXE% --output_base=%SYSTEMDRIVE%\bzlout clean
-%BAZEL_EXE% --output_base=%SYSTEMDRIVE%\bzlout shutdown
+%BAZEL_EXE% --output_base=%BAZEL_OUTPUT_BASE% clean
+%BAZEL_EXE% --output_base=%BAZEL_OUTPUT_BASE% shutdown
 
 exit /b 0
 
