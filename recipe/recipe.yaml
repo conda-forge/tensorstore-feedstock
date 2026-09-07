@@ -41,10 +41,18 @@ requirements:
     # Keep bazel listed twice here to help the migrators track dependencies
     - bazel
     - bazel ${{ bazel_version }}
-    - bazel-toolchain
+    # bazel-toolchain only knows how to generate GCC/Clang crosstool configs,
+    # so it isn't built for win-64 at all; Bazel's native MSVC autodetection
+    # is used there instead (see build.bat).
+    - if: not win
+      then: bazel-toolchain
     # https://github.com/conda-forge/bazel-toolchain-feedstock/pull/22
     - if: osx
       then: bazel-toolchain <0.3
+    # Bazel requires a real Bash interpreter on Windows even when compiling
+    # with MSVC (used by genrules and some third-party repo rules).
+    - if: win
+      then: m2-bash
     - if: target_platform != build_platform
       then:
         - python
