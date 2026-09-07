@@ -41,6 +41,16 @@ requirements:
     # Keep bazel listed twice here to help the migrators track dependencies
     - bazel
     - bazel ${{ bazel_version }}
+    # On every other platform, bazel-toolchain's --crosstool_top flag makes
+    # Bazel use its legacy CROSSTOOL-based C++ toolchain resolution, which
+    # doesn't touch rules_cc's newer, more version-sensitive Starlark code.
+    # Windows has no such flag (see below) and so goes through the modern
+    # platforms-based toolchain resolution instead, which only works with
+    # the exact Bazel release tensorstore's vendored rules_cc (0.2.19) was
+    # tested against upstream (see .bazelversion) -- newer 8.x releases can
+    # (and did) drop/rename `cc_internal` builtins that release expects.
+    - if: win
+      then: bazel ==8.5.1
     # bazel-toolchain only knows how to generate GCC/Clang crosstool configs,
     # so it isn't built for win-64 at all; Bazel's native MSVC autodetection
     # is used there instead (see build.bat).
