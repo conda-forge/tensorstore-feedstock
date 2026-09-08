@@ -29,9 +29,31 @@ source:
       then:
         - patches/0008-protobuf-upb-no-werror.patch
         - patches/0009-c-ares-darwin-no-msg_nosignal.patch
+    # On other platforms, bazel-toolchain's --crosstool_top flag makes Bazel
+    # use its legacy CROSSTOOL-based C++ toolchain resolution, which never
+    # loads rules_cc's own cc_common reimplementation. Windows has no such
+    # flag (see build.bat) and goes through that modern, rules_cc-driven
+    # path instead, where tensorstore's pinned rules_cc (0.2.19) calls
+    # cc_common.internal_DO_NOT_USE() and gets back a struct missing several
+    # methods it expects (freeze, create_header_info, ...) -- an upstream
+    # incompatibility, still open as bazelbuild/rules_cc#814 and #809. Patch
+    # Windows onto rules_cc 0.1.1 instead, matching this .bazelversion of
+    # Bazel: 0.1.1 predates rules_cc's Starlark rewrite of cc_library/etc,
+    # so its rules just wrap Bazel's native cc_* rules and never touch that
+    # private API at all.
+    - if: win
+      then: patches/0010-rules_cc-pin-0.1.1-for-windows.patch
+    # tensorstore's WORKSPACE registers an LLVM toolchain (via
+    # toolchains_llvm) purely to extract C++ API docs -- not needed to build
+    # the Python extension. toolchains_llvm has no prebuilt LLVM distribution
+    # for Windows, and Bazel resolves every registered toolchain repository
+    # up front regardless of which target is requested, so left in place it
+    # fails the whole WORKSPACE evaluation on this platform.
+    - if: win
+      then: patches/0011-windows-skip-llvm-docs-toolchain.patch
 build:
-  number: 1
-  skip: win or match(python, "<3.11")
+  number: 2
+  skip: match(python, "<3.11")
 
 requirements:
   build:
@@ -41,10 +63,28 @@ requirements:
     # Keep bazel listed twice here to help the migrators track dependencies
     - bazel
     - bazel ${{ bazel_version }}
-    - bazel-toolchain
+    # On every other platform, bazel-toolchain's --crosstool_top flag makes
+    # Bazel use its legacy CROSSTOOL-based C++ toolchain resolution, which
+    # doesn't touch rules_cc's newer, more version-sensitive Starlark code.
+    # Windows has no such flag (see below) and so goes through the modern
+    # platforms-based toolchain resolution instead, which only works with
+    # the exact Bazel release tensorstore's vendored rules_cc (0.2.19) was
+    # tested against upstream (see .bazelversion) -- newer 8.x releases can
+    # (and did) drop/rename `cc_internal` builtins that release expects.
+    - if: win
+      then: bazel ==8.5.1
+    # bazel-toolchain only knows how to generate GCC/Clang crosstool configs,
+    # so it isn't built for win-64 at all; Bazel's native MSVC autodetection
+    # is used there instead (see build.bat).
+    - if: not win
+      then: bazel-toolchain
     # https://github.com/conda-forge/bazel-toolchain-feedstock/pull/22
     - if: osx
       then: bazel-toolchain <0.3
+    # Bazel requires a real Bash interpreter on Windows even when compiling
+    # with MSVC (used by genrules and some third-party repo rules).
+    - if: win
+      then: m2-bash
     - if: target_platform != build_platform
       then:
         - python

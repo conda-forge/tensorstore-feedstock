@@ -1,0 +1,32 @@
+--- a/third_party/rules_cc/workspace.bzl	2026-09-08 18:25:07
++++ b/third_party/rules_cc/workspace.bzl	2026-09-08 18:25:24
+@@ -25,9 +25,26 @@
+     maybe(
+         http_archive,
+         name = "rules_cc",
+-        urls = mirror_url("https://github.com/bazelbuild/rules_cc/archive/0.2.19.tar.gz"),
+-        strip_prefix = "rules_cc-0.2.19",
+-        sha256 = "351248f6be41d18694d4d7c390aaebd9f865eea72a4758b2c9d782ae744c97f4",
++        # Pinned to the exact rules_cc release (0.1.1) that Bazel itself
++        # depends on (see bazelbuild/bazel's own MODULE.bazel at this
++        # .bazelversion). 0.1.1 predates rules_cc's Starlark rewrite of
++        # cc_library/cc_binary/etc, so its rules are thin wrappers around
++        # Bazel's native cc_* rules and never touch cc_common's private
++        # cc_internal API. tensorstore's own pin (0.2.19) does use that API,
++        # via cc_common.internal_DO_NOT_USE(), and on this Bazel build that
++        # comes back without several methods it expects (freeze,
++        # create_header_info, ...) -- an upstream incompatibility, still
++        # open as bazelbuild/rules_cc#814 and #809. This patch is only
++        # applied on Windows: every other platform uses bazel-toolchain's
++        # --crosstool_top flag, which routes Bazel through its legacy
++        # CROSSTOOL-based toolchain resolution and never loads rules_cc's
++        # Starlark cc_common reimplementation in the first place. Windows
++        # has no such flag (see build.bat), so it takes the modern,
++        # rules_cc-driven path instead, and needs a release that doesn't
++        # depend on the broken private API.
++        urls = mirror_url("https://github.com/bazelbuild/rules_cc/archive/0.1.1.tar.gz"),
++        strip_prefix = "rules_cc-0.1.1",
++        sha256 = "712d77868b3152dd618c4d64faaddefcc5965f90f5de6e6dd1d5ddcd0be82d42",
+         repo_mapping = {
+             "@protobuf": "@com_google_protobuf",
+         },
