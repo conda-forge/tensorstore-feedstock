@@ -33,11 +33,16 @@ source:
     # use its legacy CROSSTOOL-based C++ toolchain resolution, which never
     # loads rules_cc's own cc_common reimplementation. Windows has no such
     # flag (see build.bat) and goes through that modern, rules_cc-driven
-    # path instead, where cc_common.internal_DO_NOT_USE() doesn't expose a
-    # working `freeze` on this Bazel build -- same issue as unmerged
-    # https://github.com/bazelbuild/rules_cc/pull/814 (and #809) upstream.
+    # path instead, where tensorstore's pinned rules_cc (0.2.19) calls
+    # cc_common.internal_DO_NOT_USE() and gets back a struct missing several
+    # methods it expects (freeze, create_header_info, ...) -- an upstream
+    # incompatibility, still open as bazelbuild/rules_cc#814 and #809. Patch
+    # Windows onto rules_cc 0.1.1 instead, matching this .bazelversion of
+    # Bazel: 0.1.1 predates rules_cc's Starlark rewrite of cc_library/etc,
+    # so its rules just wrap Bazel's native cc_* rules and never touch that
+    # private API at all.
     - if: win
-      then: patches/0010-rules_cc-no-cc-internal-freeze.patch
+      then: patches/0010-rules_cc-pin-0.1.1-for-windows.patch
 build:
   number: 2
   skip: match(python, "<3.11")
