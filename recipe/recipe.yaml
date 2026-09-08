@@ -29,6 +29,15 @@ source:
       then:
         - patches/0008-protobuf-upb-no-werror.patch
         - patches/0009-c-ares-darwin-no-msg_nosignal.patch
+    # On other platforms, bazel-toolchain's --crosstool_top flag makes Bazel
+    # use its legacy CROSSTOOL-based C++ toolchain resolution, which never
+    # loads rules_cc's own cc_common reimplementation. Windows has no such
+    # flag (see build.bat) and goes through that modern, rules_cc-driven
+    # path instead, where cc_common.internal_DO_NOT_USE() doesn't expose a
+    # working `freeze` on this Bazel build -- same issue as unmerged
+    # https://github.com/bazelbuild/rules_cc/pull/814 (and #809) upstream.
+    - if: win
+      then: patches/0010-rules_cc-no-cc-internal-freeze.patch
 build:
   number: 2
   skip: match(python, "<3.11")

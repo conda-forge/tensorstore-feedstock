@@ -1,0 +1,193 @@
+diff -ruN a/third_party/rules_cc/patches/no_cc_internal_freeze.diff b/third_party/rules_cc/patches/no_cc_internal_freeze.diff
+--- a/third_party/rules_cc/patches/no_cc_internal_freeze.diff	1970-01-01 05:30:00
++++ b/third_party/rules_cc/patches/no_cc_internal_freeze.diff	2026-09-08 17:30:24
+@@ -0,0 +1,172 @@
++diff -ru a/cc/private/cc_info.bzl b/cc/private/cc_info.bzl
++--- a/cc/private/cc_info.bzl	2026-09-08 17:29:53
+++++ b/cc/private/cc_info.bzl	2026-09-08 17:29:53
++@@ -363,7 +363,7 @@
++         local_defines = local_defines if local_defines else depset(),
++         headers = headers if headers else depset(),
++         # Duplication with HeaderInfo data:
++-        direct_headers = _cc_internal.freeze(header_info.modular_public_headers + header_info.modular_private_headers + header_info.separate_module_headers),
+++        direct_headers = tuple(header_info.modular_public_headers + header_info.modular_private_headers + header_info.separate_module_headers),
++         direct_public_headers = header_info.modular_public_headers,
++         direct_private_headers = header_info.modular_private_headers,
++         direct_textual_headers = header_info.textual_headers,
++@@ -478,7 +478,7 @@
++             transitive = [dep.headers for dep in all_deps],
++         ),
++         # Duplication with HeaderInfo data:
++-        direct_headers = _cc_internal.freeze(header_info.modular_public_headers + header_info.modular_private_headers + header_info.separate_module_headers),
+++        direct_headers = tuple(header_info.modular_public_headers + header_info.modular_private_headers + header_info.separate_module_headers),
++         direct_public_headers = header_info.modular_public_headers,
++         direct_private_headers = header_info.modular_private_headers,
++         direct_textual_headers = header_info.textual_headers,
++diff -ru a/cc/private/compile/cc_compilation_helper.bzl b/cc/private/compile/cc_compilation_helper.bzl
++--- a/cc/private/compile/cc_compilation_helper.bzl	2026-09-08 17:29:53
+++++ b/cc/private/compile/cc_compilation_helper.bzl	2026-09-08 17:29:53
++@@ -372,11 +372,11 @@
++     content.set_param_file_format("multiline")
++     segments_to_exec_path = module_map.file.path.count("/")
++     leading_periods = "" if module_map_home_is_cwd else "../" * segments_to_exec_path
++-    public_headers = _cc_internal.freeze(public_headers)
++-    private_headers = _cc_internal.freeze(private_headers)
++-    public_textual_headers = _cc_internal.freeze(public_textual_headers)
++-    additional_exported_headers = _cc_internal.freeze(additional_exported_headers)
++-    separate_module_headers = _cc_internal.freeze(separate_module_headers)
+++    public_headers = tuple(public_headers)
+++    private_headers = tuple(private_headers)
+++    public_textual_headers = tuple(public_textual_headers)
+++    additional_exported_headers = tuple(additional_exported_headers)
+++    separate_module_headers = tuple(separate_module_headers)
++     data_struct = _ModuleMapInfo(
++         module_map = module_map,
++         public_headers = public_headers,
++diff -ru a/cc/private/compile/cc_compilation_outputs.bzl b/cc/private/compile/cc_compilation_outputs.bzl
++--- a/cc/private/compile/cc_compilation_outputs.bzl	2026-09-08 17:29:53
+++++ b/cc/private/compile/cc_compilation_outputs.bzl	2026-09-08 17:29:53
++@@ -83,18 +83,18 @@
++     if lto_compilation_context == None:
++         lto_compilation_context = EMPTY_LTO_COMPILATION_CONTEXT
++     return CcCompilationOutputsInfo(
++-        objects = _cc_internal.freeze(objects),
++-        pic_objects = _cc_internal.freeze(pic_objects),
+++        objects = tuple(objects),
+++        pic_objects = tuple(pic_objects),
++         temps = wrap_with_check_private_api(depset(temps)),
++-        _header_tokens = _cc_internal.freeze(header_tokens),
++-        _module_files = _cc_internal.freeze(module_files),
+++        _header_tokens = tuple(header_tokens),
+++        _module_files = tuple(module_files),
++         _lto_compilation_context = lto_compilation_context,
++-        _gcno_files = _cc_internal.freeze(gcno_files),
++-        _pic_gcno_files = _cc_internal.freeze(pic_gcno_files),
++-        _dwo_files = _cc_internal.freeze(dwo_files),
++-        _pic_dwo_files = _cc_internal.freeze(pic_dwo_files),
++-        cpp_module_files = _cc_internal.freeze(cpp_module_files),
++-        pic_cpp_module_files = _cc_internal.freeze(pic_cpp_module_files),
+++        _gcno_files = tuple(gcno_files),
+++        _pic_gcno_files = tuple(pic_gcno_files),
+++        _dwo_files = tuple(dwo_files),
+++        _pic_dwo_files = tuple(pic_dwo_files),
+++        cpp_module_files = tuple(cpp_module_files),
+++        pic_cpp_module_files = tuple(pic_cpp_module_files),
++         cpp_modules_info_file = cpp_modules_info_file,
++         pic_cpp_modules_info_file = pic_cpp_modules_info_file,
++     )
++diff -ru a/cc/private/compile/lto_compilation_context.bzl b/cc/private/compile/lto_compilation_context.bzl
++--- a/cc/private/compile/lto_compilation_context.bzl	2026-09-08 17:29:53
+++++ b/cc/private/compile/lto_compilation_context.bzl	2026-09-08 17:29:53
++@@ -59,7 +59,7 @@
++         bitcode_infos[k] = BitcodeInfo(minimized_bitcode = minimized_bitcode, copts = copts)
++     if not bitcode_infos:
++         return EMPTY_LTO_COMPILATION_CONTEXT
++-    return LtoCompilationContextInfo(lto_bitcode_inputs = _cc_internal.freeze(bitcode_infos))
+++    return LtoCompilationContextInfo(lto_bitcode_inputs = tuple(bitcode_infos))
++ 
++ def merge_lto_compilation_contexts(*, lto_compilation_contexts):
++     """Merges a list of LtoCompilationContextInfo providers.
++@@ -77,7 +77,7 @@
++     bitcode_infos = {}
++     for lto_compilation_context in lto_compilation_contexts:
++         bitcode_infos.update(lto_compilation_context.lto_bitcode_inputs)
++-    return LtoCompilationContextInfo(lto_bitcode_inputs = _cc_internal.freeze(bitcode_infos))
+++    return LtoCompilationContextInfo(lto_bitcode_inputs = tuple(bitcode_infos))
++ 
++ def get_minimized_bitcode_or_self(lto_compilation_context, full_bitcode):
++     """Gets the minimized bitcode corresponding to the full bitcode file, or returns full bitcode if it doesn't exist.
++diff -ru a/cc/private/link/create_extra_link_time_library.bzl b/cc/private/link/create_extra_link_time_library.bzl
++--- a/cc/private/link/create_extra_link_time_library.bzl	2026-09-08 17:29:53
+++++ b/cc/private/link/create_extra_link_time_library.bzl	2026-09-08 17:29:53
++@@ -71,8 +71,8 @@
++         _key = _KeyInfo(
++             build_library_func = build_library_func,
++             # _KeyInfo is used in a dict, so all of its fields must be frozen/hashable.
++-            constant_fields = _cc_internal.freeze([k for k, v in kwargs.items() if type(v) != "depset"]),
++-            depset_fields = _cc_internal.freeze([k for k, v in kwargs.items() if type(v) == "depset"]),
+++            constant_fields = tuple([k for k, v in kwargs.items() if type(v) != "depset"]),
+++            depset_fields = tuple([k for k, v in kwargs.items() if type(v) == "depset"]),
++         ),
++         **kwargs
++     )
++@@ -99,7 +99,7 @@
++     """
++     if library == None:
++         return _EMPTY
++-    libraries = _cc_internal.freeze([library])
+++    libraries = tuple([library])
++     return ExtraLinkTimeLibrariesInfo(
++         libraries = libraries,
++     )
++@@ -150,7 +150,7 @@
++ 
++         result.append(ExtraLinkTimeLibraryInfo(**merged_fields))
++     return ExtraLinkTimeLibrariesInfo(
++-        libraries = _cc_internal.freeze(result),
+++        libraries = tuple(result),
++     )
++ 
++ def build_libraries(extra_libraries, ctx, static_mode, for_dynamic_library):
++diff -ru a/cc/private/link/create_library_to_link.bzl b/cc/private/link/create_library_to_link.bzl
++--- a/cc/private/link/create_library_to_link.bzl	2026-09-08 17:29:53
+++++ b/cc/private/link/create_library_to_link.bzl	2026-09-08 17:29:53
++@@ -98,20 +98,20 @@
++         dynamic_library = dynamic_library,
++         resolved_symlink_dynamic_library = resolved_symlink_dynamic_library,
++         resolved_symlink_interface_library = resolved_symlink_interface_library,
++-        objects = _cc_internal.freeze(objects),
++-        pic_objects = _cc_internal.freeze(pic_objects),
+++        objects = tuple(objects),
+++        pic_objects = tuple(pic_objects),
++         alwayslink = alwayslink,
++         # LTO data duplication is forced by public APIs
++-        lto_bitcode_files = _cc_internal.freeze(_lto_compilation_context.lto_bitcode_inputs.keys() if _lto_compilation_context else []),
++-        pic_lto_bitcode_files = _cc_internal.freeze(_pic_lto_compilation_context.lto_bitcode_inputs.keys() if _pic_lto_compilation_context else []),
+++        lto_bitcode_files = tuple(_lto_compilation_context.lto_bitcode_inputs.keys() if _lto_compilation_context else []),
+++        pic_lto_bitcode_files = tuple(_pic_lto_compilation_context.lto_bitcode_inputs.keys() if _pic_lto_compilation_context else []),
++         _library_identifier = _library_identifier,
++         _contains_objects = _contains_objects,
++         _must_keep_debug = _must_keep_debug,
++         _disable_whole_archive = _disable_whole_archive,
++         _lto_compilation_context = _lto_compilation_context,
++         _pic_lto_compilation_context = _pic_lto_compilation_context,
++-        _shared_non_lto_backends = _cc_internal.freeze(_shared_non_lto_backends),
++-        _pic_shared_non_lto_backends = _cc_internal.freeze(_pic_shared_non_lto_backends),
+++        _shared_non_lto_backends = tuple(_shared_non_lto_backends),
+++        _pic_shared_non_lto_backends = tuple(_pic_shared_non_lto_backends),
++     )
++ 
++ def create_library_to_link(
++diff -ru a/cc/private/link/create_linker_input.bzl b/cc/private/link/create_linker_input.bzl
++--- a/cc/private/link/create_linker_input.bzl	2026-09-08 17:29:53
+++++ b/cc/private/link/create_linker_input.bzl	2026-09-08 17:29:53
++@@ -62,8 +62,8 @@
++ 
++     return _LinkerInputInfo(
++         owner = owner,
++-        libraries = _cc_internal.freeze(libraries.to_list()),
++-        user_link_flags = _cc_internal.freeze(options),
++-        additional_inputs = _cc_internal.freeze(additional_inputs.to_list()),
++-        linkstamps = _cc_internal.freeze(linkstamps.to_list()),
+++        libraries = tuple(libraries.to_list()),
+++        user_link_flags = tuple(options),
+++        additional_inputs = tuple(additional_inputs.to_list()),
+++        linkstamps = tuple(linkstamps.to_list()),
++     )
+diff -ruN a/third_party/rules_cc/workspace.bzl b/third_party/rules_cc/workspace.bzl
+--- a/third_party/rules_cc/workspace.bzl	2026-09-08 17:30:24
++++ b/third_party/rules_cc/workspace.bzl	2026-09-08 17:30:40
+@@ -28,6 +28,13 @@
+         urls = mirror_url("https://github.com/bazelbuild/rules_cc/archive/0.2.19.tar.gz"),
+         strip_prefix = "rules_cc-0.2.19",
+         sha256 = "351248f6be41d18694d4d7c390aaebd9f865eea72a4758b2c9d782ae744c97f4",
++        patches = [
++            # cc_common.internal_DO_NOT_USE() does not expose a working
++            # `freeze` on this Bazel build; use a plain Starlark tuple
++            # instead, matching bazelbuild/rules_cc#814/#809 upstream.
++            Label("//third_party:rules_cc/patches/no_cc_internal_freeze.diff"),
++        ],
++        patch_args = ["-p1"],
+         repo_mapping = {
+             "@protobuf": "@com_google_protobuf",
+         },
