@@ -43,6 +43,14 @@ source:
     # private API at all.
     - if: win
       then: patches/0010-rules_cc-pin-0.1.1-for-windows.patch
+    # tensorstore's WORKSPACE registers an LLVM toolchain (via
+    # toolchains_llvm) purely to extract C++ API docs -- not needed to build
+    # the Python extension. toolchains_llvm has no prebuilt LLVM distribution
+    # for Windows, and Bazel resolves every registered toolchain repository
+    # up front regardless of which target is requested, so left in place it
+    # fails the whole WORKSPACE evaluation on this platform.
+    - if: win
+      then: patches/0011-windows-skip-llvm-docs-toolchain.patch
 build:
   number: 2
   skip: match(python, "<3.11")

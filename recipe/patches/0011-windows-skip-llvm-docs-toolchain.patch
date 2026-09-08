@@ -1,0 +1,36 @@
+--- a/WORKSPACE	2026-08-05 10:37:03
++++ b/WORKSPACE	2026-09-08 18:34:13
+@@ -66,27 +66,12 @@
+ 
+ apple_support_dependencies()
+ 
+-# Define LLVM toolchain used for extracting C++ API documentation information
+-load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
++# tensorstore registers an LLVM toolchain here that is used only for extracting C++ API documentation
++# (the "docs" target), which this build never invokes. toolchains_llvm has no
++# prebuilt LLVM distribution for Windows, and eagerly resolving it here
++# breaks the *entire* WORKSPACE evaluation (Bazel resolves all registered
++# toolchain repositories up front, regardless of which target is requested),
++# so it is dropped entirely on this platform.
+ 
+-llvm_toolchain(
+-    name = "llvm_toolchain",
+-    extra_target_compatible_with = {
+-        "": ["@//docs:docs_toolchain_value"],
+-    },
+-    # https://github.com/bazel-contrib/toolchains_llvm/blob/master/toolchain/internal/llvm_distributions.bzl
+-    llvm_versions = {
+-        # Note: Older versions are built against older glibc, which is needed
+-        # for compatibility with manylinux containers.
+-        "": "15.0.6",
+-        "darwin-aarch64": "15.0.7",
+-        "darwin-x86_64": "15.0.7",
+-    },
+-)
+-
+-load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+-
+-llvm_register_toolchains()
+-
+ # Register the default @rules_nasm toolchain.
+ register_toolchains("@rules_nasm//nasm/toolchain")
