@@ -1,0 +1,46 @@
+diff -ruN a/third_party/rules_cc/patches/native_proxy_fallback.diff b/third_party/rules_cc/patches/native_proxy_fallback.diff
+--- a/third_party/rules_cc/patches/native_proxy_fallback.diff	1970-01-01 05:30:00
++++ b/third_party/rules_cc/patches/native_proxy_fallback.diff	2026-09-14 23:13:17
+@@ -0,0 +1,11 @@
++--- a/cc/extensions.bzl	2026-09-12 02:50:48
+++++ b/cc/extensions.bzl	2026-09-12 02:50:48
++@@ -28,7 +28,7 @@
++ 
++ def _compatibility_proxy_repo_impl(rctx):
++     bazel = native.bazel_version
++-    if not bazel or bazel >= "9":
+++    if bazel and bazel >= "9":
++         rctx.file(
++             "BUILD",
++             """
+diff -ruN a/third_party/rules_cc/workspace.bzl b/third_party/rules_cc/workspace.bzl
+--- a/third_party/rules_cc/workspace.bzl	2026-09-14 23:12:52
++++ b/third_party/rules_cc/workspace.bzl	2026-09-14 23:13:06
+@@ -25,9 +25,24 @@
+     maybe(
+         http_archive,
+         name = "rules_cc",
+-        urls = mirror_url("https://github.com/bazelbuild/rules_cc/archive/0.2.19.tar.gz"),
+-        strip_prefix = "rules_cc-0.2.19",
+-        sha256 = "351248f6be41d18694d4d7c390aaebd9f865eea72a4758b2c9d782ae744c97f4",
++        # Windows only. rules_cc 0.2.19 (tensorstore's normal pin) can't
++        # build here: its compatibility_proxy_repo() picks rules_cc's own
++        # Starlark cc_library/cc_binary/cc_toolchain over Bazel's native
++        # ones whenever native.bazel_version is unset, which it is on the
++        # win-64 conda Bazel -- and that Starlark path needs cc_common/
++        # cc_internal methods this Bazel build doesn't have.
++        # rules_cc 0.2.3 + native_proxy_fallback.diff fixes that: the patch
++        # flips compatibility_proxy_repo()'s default so an unset version
++        # picks Bazel's native rules instead, which do work. 0.2.3 (not
++        # 0.2.19) only because it has a plain native.bazel_version check to
++        # patch directly.
++        urls = mirror_url("https://github.com/bazelbuild/rules_cc/archive/0.2.3.tar.gz"),
++        strip_prefix = "rules_cc-0.2.3",
++        sha256 = "88661aba2ad049ae0be36eca8222c1911a397c077776aba8efa42b737eaa3152",
++        patches = [
++            Label("//third_party:rules_cc/patches/native_proxy_fallback.diff"),
++        ],
++        patch_args = ["-p1"],
+         repo_mapping = {
+             "@protobuf": "@com_google_protobuf",
+         },
