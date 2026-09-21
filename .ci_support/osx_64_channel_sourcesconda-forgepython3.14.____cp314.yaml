@@ -1,15 +1,25 @@
+MACOSX_DEPLOYMENT_TARGET:
+- '12.0'
+MACOSX_SDK_VERSION:
+- '12.0'
 bzip2:
 - '1'
 c_compiler:
-- vs2022
+- clang
+c_compiler_version:
+- '18'
 c_stdlib:
-- vs
+- macosx_deployment_target
+c_stdlib_version:
+- '12.0'
 channel_sources:
 - conda-forge
 channel_targets:
 - conda-forge main
 cxx_compiler:
-- vs2022
+- clangxx
+cxx_compiler_version:
+- '18'
 libavif:
 - '1'
 libcurl:
@@ -24,6 +34,8 @@ libprotobuf:
 - 7.35.1
 libwebp:
 - '1'
+macos_machine:
+- x86_64-apple-darwin13.4.0
 numpy:
 - '2'
 openssl:
@@ -35,8 +47,13 @@ pin_run_as_build:
 pybind11_abi:
 - '11'
 python:
-- 3.11.* *_cpython
+- 3.14.* *_cp314
 target_platform:
-- win-64
+- osx-64
+zip_keys:
+- - c_compiler_version
+  - cxx_compiler_version
+- - python
+  - channel_sources
 zlib:
 - '1'
