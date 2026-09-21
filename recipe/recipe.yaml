@@ -36,17 +36,17 @@ source:
     # the win-64 conda Bazel). rules_cc 0.2.3 + a small patch fixes this by
     # picking Bazel's native rules instead in that case.
     - if: win
-      then: patches/0010-rules_cc-pin-0.2.3-for-windows.patch
+      then:
     # tensorstore's WORKSPACE registers an LLVM toolchain (via
     # toolchains_llvm) purely to extract C++ API docs -- not needed to build
     # the Python extension. toolchains_llvm has no prebuilt LLVM distribution
     # for Windows, and Bazel resolves every registered toolchain repository
     # up front regardless of which target is requested, so if left in place it
     # fails the whole WORKSPACE evaluation on this platform.
-    - if: win
-      then: patches/0011-windows-skip-llvm-docs-toolchain.patch
+        - patches/0010-rules_cc-pin-0.2.3-for-windows.patch
+        - patches/0011-windows-skip-llvm-docs-toolchain.patch
 build:
-  number: 2
+  number: 3
   skip: match(python, "<3.11")
 
 requirements:
@@ -70,9 +70,7 @@ requirements:
     # bazel-toolchain only knows how to generate GCC/Clang crosstool configs,
     # so it isn't built for win-64 at all; Bazel's native MSVC autodetection
     # is used there instead (see build.bat).
-    - if: not win
-      then: bazel-toolchain
-    # https://github.com/conda-forge/bazel-toolchain-feedstock/pull/22
+      else: bazel-toolchain
     - if: osx
       then: bazel-toolchain <0.3
     # Bazel requires a real Bash interpreter on Windows even when compiling
