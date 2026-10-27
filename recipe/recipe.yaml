@@ -2,7 +2,7 @@ schema_version: 1
 
 context:
   name: tensorstore
-  version: "0.1.85"
+  version: "0.1.86"
   # Bazel version is specified upstream, file .bazelversion
   # https://github.com/google/tensorstore/blob/master/.bazelversion
   bazel_version: 8.*
@@ -14,7 +14,7 @@ package:
 
 source:
   url: https://pypi.org/packages/source/${{ name[0] }}/${{ name }}/tensorstore-${{ version }}.tar.gz
-  sha256: 26698bded0278e98e0988eb8f7d76ad248762afc5f55a38b9122ffd1474e505f
+  sha256: 1056ab91bc9e4250f01faa1350930bb3a1a16efebba18795cdf405d3c4a1b8a4
   patches:
     # MacOS needs an extra linker flag so pybind11 finds the python symbols in _tensorstore.so :shrug:
     - if: osx
@@ -46,7 +46,7 @@ source:
     - if: win
       then: patches/0011-windows-skip-llvm-docs-toolchain.patch
 build:
-  number: 2
+  number: 0
   skip: match(python, "<3.11")
 
 requirements:
