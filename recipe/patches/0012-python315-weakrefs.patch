@@ -1,0 +1,39 @@
+diff --git a/python/tensorstore/garbage_collection.cc b/python/tensorstore/garbage_collection.cc
+--- a/python/tensorstore/garbage_collection.cc
++++ b/python/tensorstore/garbage_collection.cc
+@@ -105,11 +105,11 @@ void PythonObjectReferenceManager::Visitor::DoIndirect(
+     }
+ 
+     // Actual weak reference.
+-    PyObject* python_obj = PyWeakref_GET_OBJECT(weak_ref.get());
+-    if (python_obj == Py_None) return;
++    auto python_obj = py::reinterpret_borrow<py::weakref>(weak_ref.get())();
++    if (python_obj.is_none()) return;
+ 
+-    if (manager_.python_refs_.insert(python_obj).second) {
+-      Py_INCREF(python_obj);
++    if (manager_.python_refs_.insert(python_obj.ptr()).second) {
++      python_obj.inc_ref();
+     }
+     return;
+   }
+@@ -198,15 +198,15 @@ pybind11::handle PythonWeakRef::get_value_or_null() const {
+     // Actually a strong reference.
+     return weak_ref.get();
+   }
+-  PyObject* obj = PyWeakref_GET_OBJECT(weak_ref.get());
+-  if (obj == Py_None) {
++  auto obj = py::reinterpret_borrow<py::weakref>(weak_ref.get())();
++  if (obj.is_none()) {
+     // Since `None` does not support weak references, we know that the actual
+     // value was not `None`.
+     return pybind11::handle();
+   }
+-  auto* python_type = Py_TYPE(obj);
++  auto* python_type = Py_TYPE(obj.ptr());
+   if (python_type == &WeakRefAdapterType) {
+-    return reinterpret_cast<WeakRefAdapterObject*>(obj)->owned_object;
++    return reinterpret_cast<WeakRefAdapterObject*>(obj.ptr())->owned_object;
+   }
+   return obj;
+ }
