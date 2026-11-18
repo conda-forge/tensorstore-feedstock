@@ -47,7 +47,7 @@ source:
         - patches/0010-rules_cc-pin-0.2.3-for-windows.patch
         - patches/0011-windows-skip-llvm-docs-toolchain.patch
 build:
-  number: 3
+  number: 4
   skip: match(python, "<3.11")
 
 requirements:
